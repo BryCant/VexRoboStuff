@@ -10,7 +10,8 @@ brain  Brain;
 // VEXcode device constructors
 motor LeftMotor = motor(PORT1, ratio18_1, false);
 motor RightMotor = motor(PORT10, ratio18_1, true);
-inertial Inert_Sensor = inertial(PORT11);
+inertial Inert_Sensor_11 = inertial(PORT11);
+inertial Inert_Sensor_12 = inertial(PORT12);
 
 // VEXcode generated functions
 

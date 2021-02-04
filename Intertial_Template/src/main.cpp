@@ -15,11 +15,14 @@
 // [Name]               [Type]        [Port(s)]
 // LeftMotor            motor         1               
 // RightMotor           motor         10              
-// Inert_Sensor         inertial      11              
+// Inert_Sensor_11      inertial      11              
+// Inert_Sensor_12      inertial      12              
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
 #include <string>     // std::string, std::to_string
+#include <cmath>
+#include <iostream>
 
 using namespace std;
 using namespace vex;
@@ -32,12 +35,14 @@ void InitInert();
 int main() {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
+  InitInert();
 
-  for(int side = 1; side <= 4; side++){
-    DriveForward(1);
-    DisplayDiagnostics();
-    TurnRight(90.0, 7);
-  }
+  TurnRight(90, 3);
+  float totalInertVal = (Inert_Sensor_12.heading(degrees) + Inert_Sensor_12.heading(degrees));
+  cout << "Total: " << totalInertVal;
+    
+  float averageInertVal = totalInertVal/2;
+  cout << "Average: " << averageInertVal;
 
 }
 
@@ -53,51 +58,64 @@ void DriveForward(double time){
 }
 
 void TurnRight(int setDegrees, int cycles){
+  //set inert sensor headings to zero
   InitInert();
 
   // Turns the robot to the right
-  LeftMotor.setVelocity(20, percent);
-  RightMotor.setVelocity(20, percent);
+  LeftMotor.setVelocity(40, percent);
+  RightMotor.setVelocity(40, percent);
+
   for(int cycle = 1; cycle < cycles; cycle++){
-    if (Inert_Sensor.rotation(degrees) <= setDegrees){
+    float totalInertVal = (Inert_Sensor_12.heading(degrees) + Inert_Sensor_12.heading(degrees));
+    cout << "Total: " << totalInertVal;
+    
+    float averageInertVal = totalInertVal/2;
+    cout << "Average: " << averageInertVal;
+    
+    if (abs(averageInertVal - setDegrees) > .5){
+        if (Inert_Sensor_11.rotation(degrees) <= setDegrees){
       LeftMotor.spin(vex::forward);
       RightMotor.spin(reverse);
-      waitUntil((Inert_Sensor.rotation(degrees) >= setDegrees));
+      waitUntil((Inert_Sensor_11.rotation(degrees) >= setDegrees));
       LeftMotor.stop();
       RightMotor.stop();
     }
-    else if (Inert_Sensor.rotation(degrees) >= setDegrees){
+    else if (Inert_Sensor_11.rotation(degrees) >= setDegrees){
       LeftMotor.spin(reverse);
       RightMotor.spin(vex::forward);
-      waitUntil((Inert_Sensor.rotation(degrees) <= setDegrees));
+      waitUntil((Inert_Sensor_11.rotation(degrees) <= setDegrees));
       LeftMotor.stop();
       RightMotor.stop();
     }
     LeftMotor.setVelocity(15/(cycle * 2), percent);
     RightMotor.setVelocity(15/(cycle * 2), percent);
-    wait(.5, seconds);
+    wait(1, seconds);
+    }
+    
   }
 
-  /*
-  while((setDegrees - Inert_Sensor.rotation(degrees)) != 0){
-    // nothing
-  }
-  */
 }
 
 void DisplayDiagnostics(){
-  Brain.Screen.print("Heading: %d", (Inert_Sensor.heading(degrees)));
+  //Brain.Screen.print();
+  cout << "Heading11: " << Inert_Sensor_11.rotation(degrees);
+  cout << ", Heading12: " << Inert_Sensor_12.rotation(degrees) << endl;
   Brain.Screen.print("\n");
-  Brain.Screen.print("Rotation: ", Inert_Sensor.rotation(degrees));
+  Brain.Screen.print("Rotation: ", Inert_Sensor_11.rotation(degrees));
   Brain.Screen.print("\n");
-  Brain.Screen.print("Orientation: ", Inert_Sensor.orientation(yaw,degrees));
+  Brain.Screen.print("Orientation: ", Inert_Sensor_11.orientation(yaw,degrees));
   Brain.Screen.print("\n");
 }
 
 void InitInert(){
-  Inert_Sensor.calibrate();
+  Inert_Sensor_11.calibrate();
   // waits for the Inertial Sensor to calibrate
-  while (Inert_Sensor.isCalibrating()) {
+  while (Inert_Sensor_11.isCalibrating()) {
+    wait(100, msec);
+  }
+  Inert_Sensor_12.calibrate();
+  // waits for the Inertial Sensor to calibrate
+  while (Inert_Sensor_12.isCalibrating()) {
     wait(100, msec);
   }
 }
