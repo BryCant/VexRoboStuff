@@ -36,17 +36,19 @@ int main() {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
 
-  for(int side = 1; side <= 3; side++)
+  for(int side = 1; side <= 4; side++)
   {
-    TurnRight(120, 3);
+    InitInert();
+    DriveForward(1);
+    TurnRight(90, 6);
   }
 }
 
 // -------------- FUNTIONS -------------- //
 
 void DriveForward(double time){
-  LeftMotor.setVelocity(50, percent);
-  RightMotor.setVelocity(50, percent);
+  LeftMotor.setVelocity(25, percent);
+  RightMotor.setVelocity(25, percent);
   LeftMotor.spin(vex::forward);
   RightMotor.spin(vex::forward);
   wait(time, seconds);
@@ -56,9 +58,6 @@ void DriveForward(double time){
 }
 
 void TurnRight(int setDegrees, int cycles){
-  //set inert sensor headings to zero
-  InitInert();
-
   // Turns the robot to the right
   LeftMotor.setVelocity(30, percent);
   RightMotor.setVelocity(30, percent);
@@ -67,9 +66,6 @@ void TurnRight(int setDegrees, int cycles){
     // Gets average of inertial sensors
     float totalInertVal = (Inert_Sensor_12.heading(degrees) + Inert_Sensor_12.heading(degrees));
     float averageInertVal = totalInertVal/2;
-
-    Brain.Screen.print(averageInertVal - setDegrees);
-    Brain.Screen.print("|||\n");
 
     if (abs(averageInertVal - abs(setDegrees)) > .5)   //
     {
@@ -87,11 +83,17 @@ void TurnRight(int setDegrees, int cycles){
           LeftMotor.stop();
           RightMotor.stop();
         }
-      LeftMotor.setVelocity(15/(cycle * 2), percent);
-      RightMotor.setVelocity(15/(cycle * 2), percent);
+      LeftMotor.setVelocity(5, percent);
+      RightMotor.setVelocity(5, percent);
       wait(1, seconds);
     }
   }
+  // Gets average of inertial sensors
+  float totalInertVal = (Inert_Sensor_12.heading(degrees) + Inert_Sensor_12.heading(degrees));
+  float averageInertVal = totalInertVal/2;
+
+  Brain.Screen.print(abs(averageInertVal - abs(setDegrees)));
+  Brain.Screen.print("|");
 }
 
 void InitInert(){
